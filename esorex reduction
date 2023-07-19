@@ -1,0 +1,66 @@
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
+path_reduction = "/home/harshitha/Downloads/redudata/"
+frame_files = "data.sof"
+run_code = "run"
+
+star_text_1 = "/home/harshitha/reflex_data//reflex_tmp_products/cr2re/cr2res_obs_nodding/cr2res_cal_dark_1/2022-11-13T10:53:47.204/cr2res_cal_dark_bpm.fits CAL_DARK_BPM"
+star_text_2 = "/home/harshitha/reflex_data//reflex_tmp_products/cr2re/cr2res_obs_nodding/cr2res_cal_flat_1/2022-11-13T10:53:50.305/cr2res_cal_flat_Open_master_flat.fits CAL_FLAT_MASTER"
+star_text_3 = "/home/harshitha/reflex_data//reflex_tmp_products/cr2re/cr2res_obs_nodding/cr2res_cal_wave_1/2022-11-13T10:57:25.927/cr2res_cal_wave_tw_une.fits CAL_WAVE_TW"
+
+f = open(path_reduction + frame_files,"r")
+i = 0
+h = open(path_reduction + run_code, "w")
+N = 60
+
+for i in range(0,N-1,2):
+   #adding the master files to the data file
+    f1 = open(path_reduction + frame_files,"r")
+    l = f1.readlines()
+    g = open(path_reduction + "nodding" + str(i), "w")
+    g.write(star_text_1)
+    g.write('\n')
+    g.write(star_text_2)
+    g.write('\n')
+    g.write(star_text_3)
+    g.write('\n')
+    g.write(l[i])
+    g.write('\n')
+    g.write(l[i+1])
+    g.close()
+    
+    h =open(path_reduction + run_code, "a")
+    h.write("/home/harshitha/install/bin/esorex cr2res_obs_nodding --subtract_nolight_rows  nodding" + str(i))
+    h.write('\n')
+    h.write("mkdir Reduce2/" + str(100+i))
+    h.write('\n')
+    h.write("mv cr2res_obs_nodding_combinedA.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_combinedA.fits")
+    h.write('\n')
+    h.write("mv cr2res_obs_nodding_extractedA.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_extractedA.fits")
+    h.write('\n')
+    h.write("mv cr2res_obs_nodding_slitfuncA.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_slitfuncA.fits")
+    h.write('\n')
+    h.write("mv cr2res_obs_nodding_modelA.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_modelA.fits")
+    h.write('\n')   
+    h.write("mv cr2res_obs_nodding_trace_wave_A.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_trace_wave_A.fits")
+    h.write('\n')  
+    h.write("mv cr2res_obs_nodding_combinedB.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_combinedB.fits")
+    h.write('\n')   
+    h.write("mv cr2res_obs_nodding_extractedB.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_extractedB.fits")
+    h.write('\n') 
+    h.write("mv cr2res_obs_nodding_slitfuncB.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_slitfuncB.fits")
+    h.write('\n') 
+    h.write("mv cr2res_obs_nodding_modelB.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_modelB.fits")
+    h.write('\n') 
+    h.write("mv cr2res_obs_nodding_trace_wave_B.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_trace_wave_B.fits")
+    h.write('\n')  
+    h.write("mv cr2res_obs_nodding_extracted_combined.fits Reduce2/"+str(100+i)+"/cr2res_obs_nodding_extracted_combined.fits")
+    h.write('\n') 
+    
+    i +=1
+    print(i)
+    
+f.close()
+h.close()   
