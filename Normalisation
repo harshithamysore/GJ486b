@@ -8,6 +8,8 @@ def normalize(filepath,newfilepath):
     import warnings
     warnings.filterwarnings("ignore")
     fig, axs = plt.subplots(1, 1, figsize=(24,20))
+
+    #STEP 1: COPIES THE FITS FILE
     # I am copying the fits file into a new fits file
     # so I can perform the normalisation without disturbing the initial fits file
     with fits.open(filepath) as hdu_in:
@@ -20,7 +22,7 @@ def normalize(filepath,newfilepath):
 
         # Write the output FITS file
         hdu_out.writeto(newfilepath, overwrite=True)
-
+#STEP 2: PLOTS THE DEFAULT SPECTRUM
     with fits.open(filepath) as hdu1:
         c1 = Table(hdu1[1].data)
         c2 = Table(hdu1[2].data)
@@ -44,7 +46,7 @@ def normalize(filepath,newfilepath):
         axs.plot(wln3, fln3, linewidth=0.5, color='green')
 
     hdu1.close()
-
+#STEP 3: NORMALISING THE FLUX COLUMN
 #now, lets start normalising:
 # Open the FITS file in update mode
     with fits.open(newfilepath, mode='update') as hdul:
@@ -159,7 +161,7 @@ def normalize(filepath,newfilepath):
 
         # Alternatively, you can save the updated FITS file using the writeto() method
         # fits.writeto('example.fits', hdul, overwrite=True)
-
+#STEP 4: PLOTS THE NEW NORMALISED SPECTRUM
     #now, this is after normalising:
         with fits.open(newfilepath) as hdu:
             c1 = Table(hdu[1].data)
