@@ -1,0 +1,188 @@
+def normalize(filepath,newfilepath):
+    from astropy.io import fits
+    from astropy.table import Table
+    from astropy.stats import sigma_clip
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from scipy.signal import medfilt
+    import warnings
+    warnings.filterwarnings("ignore")
+    fig, axs = plt.subplots(1, 1, figsize=(24,20))
+    # I am copying the fits file into a new fits file
+    # so I can perform the normalisation without disturbing the initial fits file
+    with fits.open(filepath) as hdu_in:
+        # Create a new HDU list for the output FITS file
+        hdu_out = fits.HDUList()
+
+        # Copy each HDU from the input file to the output file
+        for hdu in hdu_in:
+            hdu_out.append(hdu.copy())
+
+        # Write the output FITS file
+        hdu_out.writeto(newfilepath, overwrite=True)
+
+    with fits.open(filepath) as hdu1:
+        c1 = Table(hdu1[1].data)
+        c2 = Table(hdu1[2].data)
+        c3 = Table(hdu1[3].data)
+    # CHIP1:
+    for i in range(0, 21, 3):
+        wln1 = (c1.field(i + 2))
+        fln1 = (c1.field(i))
+        #mask1 = fln1 > 100000
+        #fln1[mask1] = np.nan
+        axs.plot(wln1, fln1, linewidth=0.5, color='green')
+    # CHIP2:
+    for i in range(0, 21, 3):
+        wln2 = (c2.field(i + 2))
+        fln2 = (c2.field(i))
+        axs.plot(wln2, fln2, linewidth=0.5, color='green')
+    # CHIP 3:
+    for j in range(0, 17, 3):
+        wln3 = (c3.field(j + 2))
+        fln3 = (c3.field(j))
+        axs.plot(wln3, fln3, linewidth=0.5, color='green')
+
+    hdu1.close()
+
+#now, lets start normalising:
+# Open the FITS file in update mode
+    with fits.open(newfilepath, mode='update') as hdul:
+
+        # Get the headers and data
+        old_headers = hdul[0].header
+        old_header1 = hdul[1].header
+        old_header2 = hdul[2].header
+        old_header3 = hdul[3].header
+
+        old_data1 = hdul[1].data
+        old_data2 = hdul[2].data
+        old_data3 = hdul[3].data
+
+        # CHIP 1 :-
+        flux1 = []
+        spec1 = []
+        fl= []
+        for i in range(0, 21, 3):
+            wl1 = old_data1.field(i + 2)
+            # normalising flux-
+            fl1 = (old_data1.field(i))
+            g = np.polyfit(wl1[~np.isnan(fl1)], fl1[~np.isnan(fl1)], 3)  # order in polynomial
+            g1 = np.polyval(g, wl1)
+            flux1 = sigma_clip(fl1 - g1)
+            spec1 = np.append(spec1, flux1)
+
+        # split the big array into 7 arrays for 7 columns
+        sub_spec1 = np.array_split(spec1, 7)
+        # to use the array, just use sub_spec[number of array]
+        # Modify the values in the column
+        sp1 = sub_spec1[0]
+        old_data1['02_01_SPEC'] = sp1
+        sp2 = sub_spec1[1]
+        old_data1['03_01_SPEC'] = sp2
+        sp3 = sub_spec1[2]
+        old_data1['04_01_SPEC'] = sp3
+        sp4 = sub_spec1[3]
+        old_data1['05_01_SPEC'] = sp4
+        sp5 = sub_spec1[4]
+        old_data1['06_01_SPEC'] = sp5
+        sp6 = sub_spec1[5]
+        old_data1['07_01_SPEC'] = sp6
+        sp7 = sub_spec1[6]
+        old_data1['08_01_SPEC'] = sp7
+
+        # CHIP 2 :-
+        flux2 = []
+        spec2 = []
+        fl = []
+
+        for i in range(0, 21, 3):
+            wl2 = old_data2.field(i + 2)
+            # normalising flux-
+            fl2 = (old_data2.field(i))
+            gg = np.polyfit(wl2[~np.isnan(fl2)], fl2[~np.isnan(fl2)], 3)  # order 1 in poolynomial
+            g2 = np.polyval(gg, wl2)
+            flux2 = sigma_clip(fl2 - g2)
+            spec2 = np.append(spec2, flux2)
+
+        # split the big array into 7 arrays for 7 columns
+        sub_spec2 = np.array_split(spec2, 7)
+        # to use the array, just use sub_spec[number of array]
+        # Modify the values in the column
+        ssp1 = sub_spec2[0]
+        old_data2['02_01_SPEC'] = ssp1
+        ssp2 = sub_spec2[1]
+        old_data2['03_01_SPEC'] = ssp2
+        ssp3 = sub_spec2[2]
+        old_data2['04_01_SPEC'] = ssp3
+        ssp4 = sub_spec2[3]
+        old_data2['05_01_SPEC'] = ssp4
+        ssp5 = sub_spec2[4]
+        old_data2['06_01_SPEC'] = ssp5
+        ssp6 = sub_spec2[5]
+        old_data2['07_01_SPEC'] = ssp6
+        ssp7 = sub_spec2[6]
+        old_data2['08_01_SPEC'] = ssp7
+
+        # CHIP 3 :-
+        flux3 = []
+        spec3 = []
+        fl = []
+        for i in range(0, 17, 3):
+            wl3 = old_data3.field(i + 2)
+            # normalising flux-
+            fl3 = (old_data3.field(i))
+            ggg = np.polyfit(wl3[~np.isnan(fl3)], fl3[~np.isnan(fl3)], 3)  # order 1 in poolynomial
+            g3 = np.polyval(ggg, wl3)
+            flux3 = sigma_clip(fl3 - g3)
+            spec3 = np.append(spec3, flux3)
+
+        # split the big array into 6 arrays for 6 columns
+        sub_spec3 = np.array_split(spec3, 6)
+        # to use the array, just use sub_spec[number of array]
+        # Modify the values in the column
+        sssp1 = sub_spec3[0]
+        old_data3['03_01_SPEC'] = sssp1
+        sssp2 = sub_spec3[1]
+        old_data3['04_01_SPEC'] = sssp2
+        sssp3 = sub_spec3[2]
+        old_data3['05_01_SPEC'] = sssp3
+        sssp4 = sub_spec3[3]
+        old_data3['06_01_SPEC'] = sssp4
+        sssp5 = sub_spec3[4]
+        old_data3['07_01_SPEC'] = sssp5
+        sssp6 = sub_spec3[5]
+        old_data3['08_01_SPEC'] = sssp6
+
+        # Close the FITS file
+        hdul.close()
+
+        # Alternatively, you can save the updated FITS file using the writeto() method
+        # fits.writeto('example.fits', hdul, overwrite=True)
+
+    #now, this is after normalising:
+        with fits.open(newfilepath) as hdu:
+            c1 = Table(hdu[1].data)
+            c2 = Table(hdu[2].data)
+            c3 = Table(hdu[3].data)
+
+        # CHIP1:
+        for i in range(0, 21, 3):
+            wl1 = (c1.field(i + 2))
+            fl1 = (c1.field(i))
+            axs.plot(wl1, fl1, linewidth=0.5, color='blue')
+
+        # CHIP2:
+        for i in range(0, 21, 3):
+            wl2 = (c2.field(i + 2))
+            fl2 = (c2.field(i))
+            axs.plot(wl2, fl2, linewidth=0.5, color='blue')
+        # CHIP 3:
+        for j in range(0, 17, 3):
+            wl3 = (c3.field(j + 2))
+            fl3 = (c3.field(j))
+            axs.plot(wl3, fl3, linewidth=0.5, color='blue')
+        plt.title(filepath)
+        plt.show()
+
+    return plt
