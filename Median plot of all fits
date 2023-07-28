@@ -1,0 +1,59 @@
+from astropy.io import fits
+from astropy.table import Table
+import numpy as np
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
+
+fig, axs = plt.subplots(3, 1, figsize=(10, 15))  # Adjust size as needed
+
+for k in range(100,159,2):
+    with fits.open('/home/harshitha/Downloads/PCA/july19_new fits/'+str(k)+'_crires.fits') as hdu1:
+        c1 = Table(hdu1[1].data)
+        c2 = Table(hdu1[2].data)
+        c3 = Table(hdu1[3].data)
+
+        # CHIP1:
+        for i in range(0, 21, 3):
+            wl = c1.field(i + 2)
+            fl = c1.field(i)
+            wl = wl[np.isfinite(fl)]
+            fl = fl[np.isfinite(fl)]
+            median = np.median(fl)
+            flux = fl / median
+            axs[0].plot(wl, flux, linewidth=0.5)
+
+        # CHIP2:
+        for i in range(0, 21, 3):
+            wl = c2.field(i + 2)
+            fl = c2.field(i)
+            wl = wl[np.isfinite(fl)]
+            fl = fl[np.isfinite(fl)]
+            median = np.median(fl)
+            flux = fl / median
+            axs[1].plot(wl, flux, linewidth=0.5)
+
+        # CHIP3:
+        for j in range(0, 17, 3):
+            wl = c3.field(j + 2)
+            fl = c3.field(j)
+            wl = wl[np.isfinite(fl)]
+            fl = fl[np.isfinite(fl)]
+            median = np.median(fl)
+            flux = fl / median
+            axs[2].plot(wl, flux, linewidth=0.5)
+
+# You can set labels and titles for each subplot as needed
+axs[0].set_title('CHIP1')
+axs[1].set_title('CHIP2')
+axs[2].set_title('CHIP3')
+axs[0].set_ylabel('Flux')
+axs[1].set_ylabel('Flux')
+axs[2].set_ylabel('Flux')
+axs[2].set_xlabel('Wavelength')
+axs[0].grid(True)
+axs[1].grid(True)
+axs[2].grid(True)
+plt.tight_layout()  # Adjusts subplot params so that subplots fit in the figure area
+
+plt.show()
