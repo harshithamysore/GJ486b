@@ -1,0 +1,76 @@
+from astropy.io import fits
+from astropy.table import Table
+import numpy as np
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
+
+def premolecfit_implot(wavelength_star,wavelength_end):
+    
+
+    def forceAspect(ax,aspect):
+        im = ax.get_images()
+        extent =  im[0].get_extent()
+        ax.set_aspect(abs((extent[1]-extent[0])/(extent[3]-extent[2]))/aspect)
+
+    fig = plt.figure(figsize=(12,10))
+    ax = fig.add_subplot(111)
+    flux_array = []
+    for k in range (100,159,2):
+        filepath = '/home/harshitha/Downloads/PCA/july19_new fits/molecfit fits/'+str(k)+'_crires_normalised/GJ486-IR-transit1_SCIENCE_TELLURIC_CORR.fits'
+        with fits.open(filepath) as hdu:
+            c1 = Table(hdu[1].data)
+            flux = c1.field(3)
+            wavelength = c1.field(0)
+
+            #removing all nans and zeroes from fl and wl array
+            J = np.where(~(np.isnan(flux) | (flux == 0.0)))
+            flux = np.array(flux[J])
+            wavelength = np.array(wavelength[J])
+
+            flux_array.append(flux)
+
+    #as the flux arrays here have different shapes, i am padding the extra rows with a value = 1
+    max_length = max(len(arr) for arr in flux_array)
+    flux_array_padded = [np.pad(arr, (1, max_length - len(arr)), mode='constant') for arr in flux_array]
+    flux_2d_array = np.stack(flux_array_padded, axis=1)
+
+    flux = np.transpose(flux_2d_array)
+    #print(flux.shape)
+
+        # Select rangue to work
+    #wavelength_star = 2455
+    #wavelength_end  = 2466
+    master_lambda_1 = wavelength
+    result_transit_1 = flux
+    
+    op = np.load("/home/harshitha/Desktop/codesfor486/orbital_phase.npy") #orbital phase
+
+    index_a = np.where(master_lambda_1 > wavelength_star)[0][0]
+    index_b = np.where(master_lambda_1 > wavelength_end )[0][0]
+
+    x_size = len(result_transit_1[0,index_a:index_b])
+    y_size = len(result_transit_1[:,0])
+
+    #print(index_a, index_b)
+    #print(x_size, y_size)
+
+    #print("Mean: ", np.mean(result_transit_1[:,index_a:index_b]))
+    #print("Min: ", np.min(result_transit_1[:,index_a:index_b]))
+    #print("Max: ", np.max(result_transit_1[:,index_a:index_b]))
+    #print("STD: ", np.std(result_transit_1[:,index_a:index_b]))
+    std = np.std(result_transit_1[:,index_a:index_b])
+    mean = np.mean(result_transit_1[:,index_a:index_b])
+
+    im = ax.imshow(result_transit_1[:,index_a:index_b], interpolation="None", extent=[wavelength_star,wavelength_end, op[-1], op[0]], vmax=mean+std*2 ,vmin=0, cmap='viridis')           
+    forceAspect(ax,aspect=2)
+    ax.tick_params(which='both', direction='in', length=12, width=2, colors='k',
+                        bottom=True, top=True, left=True, right=True)
+    colorbar = plt.colorbar(im,ax=ax,pad=0.02,shrink=0.5)
+    colorbar.set_label("Flux")
+    ax.set_xlabel(r"Wavelength(nm)")
+    ax.set_ylabel(r"Orbital phase")
+    plt.title("Pre-Molecfit data")
+    plt.legend()
+    plt.show()
+    
