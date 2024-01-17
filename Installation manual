@@ -1,0 +1,45 @@
+STEPS TO INSTALL  ESO PIPELINE(for linux and windows):
+(For the manual with images, https://docs.google.com/document/d/13qimQobaa68Mr5jyc12dl9XXEhTftN5qk213MdQxyRo/edit?usp=sharing)
+
+NOTE: Download and install all pipelines(that are required) at once, as downloading a new pipeline later will lead to the removal of the current existing esoreflex and previously installed pipelines and data(!).
+
+STEP 1:  The script for downloading and installing the pipelines are available at https://www.eso.org/sci/software/pipelines/install_esoreflex
+
+One can directly start the installation from the terminal by downloading the pipeline through the “wget” command, 
+>> wget  https://www.eso.org/sci/software/pipelines/install_esoreflex
+
+STEP 2: Now, you have the pipeline script downloaded under the name, install_esoreflex. 
+You can start the installation process by running the command, 
+>> ./install_esoreflex
+
+NOTE: Most of the time, the system will need a permission to install the pipelines and will deny the installation, you can give permission, by using,
+ >> chmod u+x install_esoreflex
+
+Once, the permission is given, you can start the installation by using ./install_esoreflex
+
+STEP 3: Next, it's time to input directories for files and demo data, you can just press enter for default settings and move on further, you will have some warnings about python, which you can ignore (which is what I did!) or can resolve them if you have time and the expertise.
+
+STEP 4: after choosing the directories, you will have options to choose the pipelines,
+
+You can select one or more pipelines, but be careful in selecting all the pipelines you would use at once. 
+In the image above, i have selected only CR2RES pipeline by typing in 1, you can install multiple pipelines by typing in the numbers of all the pipelines with spaces in between, like, 1 5 15 , here I am selecting CR2RES, ESPRESSO and MOLECFIT to install. 
+
+STEP 5: Next, you are asked to select demo data to download, I suggest skipping this step by typing in ‘None’ (here, None is case sensitive). As downloading the demo data will increase the overall installation time, you can download the demo data later through the ESO pipeline website. 
+
+STEP 6: After choosing the directories, pipelines and demo data, you are asked to confirm one last time, by pressing y, the installation process begins. 
+
+Step 7: Once, the installation is complete, you are provided with a pathway to open the esoreflex window, this pathway can also be modified for your preference. 
+
+Then to open the reflex window, type in
+>> /home/harshitha/install/bin/esoreflex
+
+NOTE: 
+If an error regarding python appears, then you have to add the path to python in the vi editor file. 
+
+ -> ‘which python’ will give the path to python in the system.
+Go to the vi file- 
+
+And next, inside the vi file, add the path, in the  command used to launch python.
+‘esoreflex.python-command=’
+
+Finally, now run the code ‘/home/harshitha/install/bin/esoreflex’ to open the reflex window. 
